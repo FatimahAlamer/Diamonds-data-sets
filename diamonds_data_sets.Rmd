@@ -1,0 +1,105 @@
+---
+title: "Diamonds data sets"
+author: "Fatimah Alamer"
+date: "10/1/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,eval = TRUE)
+```
+**Introduction** 
+
+diamonds data sets is one of popular example data sets in R 
+lets gets familiar with data set 
+**first step** we have to install tidyvers package
+```{r , echo = TRUE, eval = FALSE}
+install.packages("tidyverse")
+```
+**second step**: Initialize package 
+
+```{r , echo = TRUE, eval = TRUE}
+library(tidyverse)
+```
+Now, our diamonds data sets 
+```{r , echo = TRUE, eval = TRUE}
+diamonds
+```
+
+
+Now, lets gets familiar with data, you may think to use summary, or we can use glimpse function from tidyvers package, you can now see the difference
+
+```{r  eval = TRUE}
+summary(diamonds)
+
+
+glimpse(diamonds)
+```
+
+Now, we know some information regarding the data:
++There are 53,940 round-cut diamonds,that is exactly the number of rows!
++There are 10 variables:cut, color, & clarity,carat, depth, table, x, y, z, price
+
+
+**1-data transformation with dplyr**
+ now,we want to know the price regarding for each clarity type:
+
+
+```{r }
+
+diamonds%>%
+  group_by(clarity ) %>%
+  summarise(avg = mean(price),
+            mimum= min(price),
+            max= max(price),
+            stdev = sd(price))
+```
+for more usefull information,  see [dplyr cheat sheet](https://nyu-cdsc.github.io/learningr/assets/data-transformation.pdf)
+
+   
+**2-Data tidying with tidyr**
+  lets make our data tidy.
+```{r }
+diamonds%>%
+  
+  pivot_longer(c(x,y,z), names_to = "dimension", values_to = "value") -> diamonds_tidy
+
+           
+```
+after making tidy data long , we have 161820 observation ! increasing number of observation will makes it easier to reproduce analyses because they are more easy to understand, update, and reuse.
+for more useful information,  see [tidyer cheat sheet](https://github.com/rstudio/cheatsheets/blob/master/tidyr.pdf')
+
+**3-data vizulization with ggplot2**
+lets have the first ggplot:
+ 
+```{r }
+
+ggplot(diamonds_tidy, aes(carat, price)) + geom_point()+
+geom_point(shape = 16, alpha = 0.5, position = "jitter")
+```
+
+
+```{r}
+ggplot(diamonds_tidy, aes(carat, price,color = clarity)) + 
+geom_point(shape = 16, alpha = 0.5, position = "jitter")+
+      geom_smooth(method=lm, se=FALSE)+
+facet_grid(cut~.)+
+ labs(x = "carat",
+       y = "price",
+       title = "The diamonds Dataset",
+       color = "clarity")
+ 
+```
+for more useful information,  see [ggplot2 cheat sheet](https://nyu-cdsc.github.io/learningr/assets/data-visualization-2.1.pdf)
+
+**4-Table**:the largest 20 diamonds in the `diamonds` dataset
+```{r results = "asis"}
+library(knitr)
+diamonds %>%
+  arrange(desc(carat)) %>%
+  slice(1:20) %>%
+  select(carat, cut, color, clarity) %>%
+  knitr::kable(
+    caption = "The largest 20 diamonds in the `diamonds` dataset."
+  )
+```
